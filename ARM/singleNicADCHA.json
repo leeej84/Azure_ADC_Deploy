@@ -391,8 +391,8 @@
                         "name": "web-rule",
                         "properties": {
                             "priority": 1002,
-                            "sourceAddressPrefix": "Internet",
-                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
                             "destinationPortRange": "443",
                             "access": "Allow",
                             "direction": "Inbound",                            
