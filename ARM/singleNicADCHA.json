@@ -161,8 +161,8 @@
                             "frontendIPConfiguration": {
                                 "id": "[variables('ipConfId')]"
                             },
-                            "frontendPort": 80,
-                            "backendPort": 80,
+                            "frontendPort": 443,
+                            "backendPort": 443,
                             "enableFloatingIP": true,
                             "idleTimeoutInMinutes": 4,
                             "protocol": "Tcp",
@@ -385,6 +385,20 @@
                             "direction": "Inbound",
                             "sourcePortRange": "*",
                             "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "web-rule",
+                        "properties": {
+                            "description": "Allow Secure WEB",
+                            "priority": 1001,
+                            "protocol": "Tcp",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "Internet",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "443"
                         }
                     }
                 ]
