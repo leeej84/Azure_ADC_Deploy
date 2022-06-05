@@ -34,7 +34,7 @@
             }
         },
         "vmSku": {
-            "defaultValue": "netscalerbyol",
+            "defaultValue": "netscaler10standard",
             "type": "String",
             "allowedValues": [
                 "netscalerbyol",
@@ -60,7 +60,7 @@
             }
         },
         "vnetName": {
-            "defaultValue": "vnet01",
+            "defaultValue": "",
             "type": "String",
             "metadata": {
                 "description": "Name of Virtual Network"
@@ -73,26 +73,11 @@
                 "description": "Resource Group name of existing Virtual Network. Leave empty if Resource Group is same as current deployment."
             }
         },
-        "vnetNewOrExisting": {
-            "defaultValue": "new",
-            "allowedValues": [
-                "new",
-                "existing"
-            ],
-            "type": "String"
-        },
         "snetName": {
-            "defaultValue": "subnet",
+            "defaultValue": "",
             "type": "String",
             "metadata": {
                 "description": "Name of Subnet. Enter existing subnet name if opting for existing Virtual Network"
-            }
-        },
-        "snetAddressPrefix": {
-            "defaultValue": "10.11.0.0/24",
-            "type": "String",
-            "metadata": {
-                "description": "Value of subnet in CIDR form. Ignore this field if opting for existing Virtual Network, Address prefix will be picked from existing Subnet."
             }
         },
         "acceleratedNetworking": {
@@ -285,28 +270,6 @@
             "properties": {}
         },
         {
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[parameters('vnetName')]",
-            "apiVersion": "2017-10-01",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('snetAddressPrefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[parameters('snetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('snetAddressPrefix')]"
-                        }
-                    }
-                ]
-            },
-            "condition": "[equals(parameters('vnetNewOrExisting'),'new')]"
-        },
-        {
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicN'), copyIndex())]",
             "apiVersion": "2017-10-01",
@@ -360,7 +323,6 @@
                 }
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
                 "[concat('Microsoft.Network/publicIpAddresses/', variables('vmN'), copyIndex(), variables('mgmt-pipN-suffix'))]",
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgN'), copyIndex())]",
                 "[concat('Microsoft.Network/loadBalancers/', variables('lbN'))]"
