@@ -54,14 +54,6 @@
                 "description": "Resource Group name of existing Virtual Network. Leave empty if Resource Group is same as current deployment."
             }
         },
-        "vnetNewOrExisting": {
-            "defaultValue": "new",
-            "allowedValues": [
-                "new",
-                "existing"
-            ],
-            "type": "String"
-        },
         "networkInterfaceName": {
             "defaultValue": "citrix-adc-vpx-express-nic",
             "type": "string",
@@ -83,13 +75,6 @@
                 "description": "Name of the diagnostics Storage Account. If left empty, an auto-generated name will be used."
             }
         },
-        "addressPrefix": {
-            "defaultValue": "10.11.0.0/24",
-            "type": "String",
-            "metadata": {
-                "description": "Value of virtual network's Address range in CIDR form. Ignore this field if opting for existing Virtual Network."
-            }
-        },
         "acceleratedNetworking": {
             "type": "Bool",
             "defaultValue": true,
@@ -102,13 +87,6 @@
             "type": "string",
             "metadata": {
                 "description": "Name of subnet. ensure subnet exists in case of existing Virtual Network."
-            }
-        },
-        "subnetPrefix": {
-            "defaultValue": "10.11.0.0/24",
-            "type": "String",
-            "metadata": {
-                "description": "Value of default subnet address range in CIDR form. Ignore this field if opting for existing Virtual Network, Address prefix will be picked from existing Subnet."
             }
         }
     },
@@ -200,34 +178,11 @@
             "properties": {}
         },
         {
-            "name": "[parameters('virtualNetworkName')]",
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2017-10-01",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('addressPrefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[parameters('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnetPrefix')]"
-                        }
-                    }
-                ]
-            },
-            "condition": "[equals(parameters('vnetNewOrExisting'),'new')]"
-        },
-        {
             "name": "[parameters('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-vip')]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-nsip')]",
                 "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
