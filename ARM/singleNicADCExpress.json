@@ -71,6 +71,7 @@
         "diagnosticsStorageAccountName": {
             "defaultValue": "",
             "type": "string",
+            
             "metadata": {
                 "description": "Name of the diagnostics Storage Account. If left empty, an auto-generated name will be used."
             }
@@ -116,6 +117,9 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2017-12-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                        "ADCDeployed": "Resource"
+                    },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-nsip')]",
@@ -172,6 +176,9 @@
             "apiVersion": "2017-10-01",
             "kind": "Storage",
             "location": "[resourceGroup().location]",
+            "tags": {
+                        "ADCDeployed": "Resource"
+                    },
             "sku": {
                 "name": "Standard_LRS"
             },
@@ -182,6 +189,9 @@
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                        "ADCDeployed": "Resource"
+                    },
             "dependsOn": [
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-vip')]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-nsip')]",
@@ -191,20 +201,25 @@
                 "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
                 "ipConfigurations": [
                     {
-                        "name": "nsip",
+                        "name": "nsip",                        
                         "properties": {
+                            
                             "primary": true,
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('virtualMachineName'), '-nsip'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('virtualMachineName'), '-nsip'))]",
+                                "tags": {
+                                    "ADCDeploy": "PublicIP",
+                                    "ADCDeployed": "Resource"
+                                }
                             }
                         }
                     },
                     {
-                        "name": "vip",
+                        "name": "vip",                        
                         "properties": {
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
@@ -216,7 +231,7 @@
                         }
                     },
                     {
-                        "name": "snip",
+                        "name": "snip",                        
                         "properties": {
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
@@ -226,7 +241,10 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+                    "tags": {
+                        "ADCDeployed": "Resource"
+                    }
                 }
             }
         },
@@ -236,7 +254,7 @@
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
             "tags": {
-                "ADCDeploy": "PublicIP"
+                "ADCDeployed": "Resource"
             },
             "properties": {
                 "publicIpAllocationMethod": "Dynamic"
@@ -250,6 +268,10 @@
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeploy": "PublicIP",
+                "ADCDeployed": "Resource"
+            },
             "properties": {
                 "publicIpAllocationMethod": "Dynamic"
             },
@@ -262,6 +284,9 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "properties": {
                 "securityRules": [
                     {

@@ -127,6 +127,9 @@
             "name": "[variables('lbN')]",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "properties": {
                 "frontendIPConfigurations": [
                     {
@@ -186,6 +189,9 @@
             "name": "[variables('avsN')]",
             "apiVersion": "2017-12-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "properties": {
                 "platformFaultDomainCount": 3,
                 "platformUpdateDomainCount": 20
@@ -196,6 +202,9 @@
             "name": "[concat(variables('vmN'), copyIndex())]",
             "apiVersion": "2017-12-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "copy": {
                 "name": "vmcopy",
                 "count": 2
@@ -264,6 +273,9 @@
             "apiVersion": "2017-10-01",
             "kind": "Storage",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "sku": {
                 "name": "Standard_LRS"
             },
@@ -274,6 +286,9 @@
             "name": "[concat(variables('nicN'), copyIndex())]",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "copy": {
                 "name": "niccopy",
                 "count": 2
@@ -283,7 +298,7 @@
                 "ipConfigurations": [
                     {
                         "name": "nsip",
-                        "properties": {
+                        "properties": {                            
                             "primary": true,
                             "subnet": {
                                 "id": "[variables('snetRef')]"
@@ -333,6 +348,9 @@
             "name": "[variables('alb-pipN')]",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "properties": {
                 "publicIpAllocationMethod": "Dynamic"
             }
@@ -343,7 +361,8 @@
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
             "tags": {
-                "ADCDeploy": "PublicIP"
+                "ADCDeploy": "PublicIP",
+                "ADCDeployed": "Resource"
             },
             "copy": {
                 "name": "ipcopy",
@@ -358,6 +377,9 @@
             "name": "[concat(variables('nsgN'), copyIndex())]",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
+            "tags": {
+                "ADCDeployed": "Resource"
+            },
             "copy": {
                 "name": "nsgcopy",
                 "count": 2
