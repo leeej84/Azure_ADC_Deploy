@@ -78,6 +78,7 @@ Function Remove-VirtualMachine() {
 
 #Cleanup remaining non-VM related items
 Get-AZResource -Tag @{ADCDeployed = 'Resource'} | Remove-AzResource -Force
+Get-AZResource -Tag @{ADCDeployed = 'Resource'} | Remove-AzResource -Force
 
 #Remove the VM
 Write-Host "deleting $($params.vmName)"
