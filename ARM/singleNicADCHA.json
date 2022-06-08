@@ -2,19 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "130.2020.12.21",
     "parameters": {
-        "adminUsername": {
-            "type": "String",
+        "virtualMachineName": {
+            "defaultValue": "citrix-adc-vpx-express",
+            "type": "string",
             "metadata": {
-                "description": "Username for the Virtual Machines."
+                "description": "Name of the Virtual Machine."
             }
         },
-        "adminPassword": {
-            "type": "SecureString",
-            "metadata": {
-                "description": "Password for the Virtual Machines."
-            }
-        },
-        "vmSize": {
+        "virtualMachineSize": {
             "defaultValue": "Standard_D2s_v4",
             "type": "String",
             "metadata": {
@@ -33,30 +28,16 @@
                 "description": "Citrix ADC Version. netscalervpx-131 is recommended. Note: 5000Mbps is supported only in 13.1 version."
             }
         },
-        "vmSku": {
-            "defaultValue": "netscaler10standard",
+        "adminUsername": {
             "type": "String",
-            "allowedValues": [
-                "netscalerbyol",
-                "netscaler10standard",
-                "netscaler10enterprise",
-                "netscaler10platinum",
-                "netscaler200standard",
-                "netscaler200enterprise",
-                "netscaler200platinum",
-                "netscaler1000standard",
-                "netscaler1000enterprise",
-                "netscaler1000platinum",
-                "netscaler3000standard",
-                "netscaler3000enterprise",
-                "netscaler3000platinum",
-                "netscaler5000standard",
-                "netscaler5000enterprise",
-                "netscaler5000platinum"
-            ],
-
             "metadata": {
-                "description": "SKU of Citrix ADC Image."
+                "description": "Username for the Virtual Machines."
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Password for the Virtual Machines."
             }
         },
         "virtualNetworkName": {
@@ -86,12 +67,37 @@
             "metadata": {
                 "description": "Enables low latency and high throughput on the network interface.[Learn more](https://docs.microsoft.com/en-gb/azure/virtual-network/create-vm-accelerated-networking-cli)"
             }
+        },
+        "vmSku": {
+            "defaultValue": "netscaler10standard",
+            "type": "String",
+            "allowedValues": [
+                "netscalerbyol",
+                "netscaler10standard",
+                "netscaler10enterprise",
+                "netscaler10platinum",
+                "netscaler200standard",
+                "netscaler200enterprise",
+                "netscaler200platinum",
+                "netscaler1000standard",
+                "netscaler1000enterprise",
+                "netscaler1000platinum",
+                "netscaler3000standard",
+                "netscaler3000enterprise",
+                "netscaler3000platinum",
+                "netscaler5000standard",
+                "netscaler5000enterprise",
+                "netscaler5000platinum"
+            ],
+
+            "metadata": {
+                "description": "SKU of Citrix ADC Image."
+            }
         }
     },
     "variables": {
-        "vmN": "ns-vpx",
-        "nicN": "ns-vpx-nic",
-        "nsgN": "ns-vpx-nic-nsg",
+        "nicN": "[concat('nic-',parameters('virtualMachineName'))]",
+        "nsgN": "[concat('nsg-',parameters('virtualMachineName'))]",
         "lbN": "alb",
         "bePoolN": "bepool-11",
         "probeN": "probe-11",
@@ -199,7 +205,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('vmN'), copyIndex())]",
+            "name": "[concat(parameters('virtualMachineName'), copyIndex())]",
             "apiVersion": "2017-12-01",
             "location": "[resourceGroup().location]",
             "tags": {
@@ -216,13 +222,13 @@
             },
             "properties": {
                 "osProfile": {
-                    "computerName": "[concat(variables('vmN'), copyIndex())]",
+                    "computerName": "[concat(parameters('virtualMachineName'), copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "customData": "[base64(concat('{\"username\":\"', parameters('adminUsername'), '\",\"ha_config\":{\"peer_node\":\"', reference(concat(variables('nicN'), sub(1, copyIndex()))).ipConfigurations[0].properties.privateIPAddress ,'\"},\"vpx_config\":{\"snip_11\":\"', reference(concat(variables('nicN'), copyIndex())).ipConfigurations[1].properties.privateIPAddress ,'\",\"pvt_ip_12\":\"', reference(concat(variables('nicN'), copyIndex())).ipConfigurations[2].properties.privateIPAddress ,'\",\"subnet_11\":\"', reference(variables('snetRef'), '2017-10-01', 'Full').properties.addressPrefix ,'\",\"subnet_12\":\"', reference(variables('snetRef'), '2017-10-01', 'Full').properties.addressPrefix, '\"}}'))]"
                 },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize": "[parameters('virtualMachineSize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
@@ -236,7 +242,7 @@
                         "vhd": {
                             "uri": "[concat(reference(variables('saN'), '2017-10-01').primaryEndpoints.blob, 'vhds/osdisk', copyIndex(), '.vhd')]"
                         },
-                        "name": "[concat(variables('vmN'), copyIndex())]"
+                        "name": "[concat(parameters('virtualMachineName'), copyIndex())]"
                     },
                     "dataDisks": []
                 },
@@ -305,7 +311,7 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(variables('vmN'), copyIndex(), variables('mgmt-pipN-suffix')))]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('virtualMachineName'), copyIndex(), variables('mgmt-pipN-suffix')))]"
                             }
                         }
                     },
@@ -338,7 +344,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIpAddresses/', variables('vmN'), copyIndex(), variables('mgmt-pipN-suffix'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), copyIndex(), variables('mgmt-pipN-suffix'))]",
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgN'), copyIndex())]",
                 "[concat('Microsoft.Network/loadBalancers/', variables('lbN'))]"
             ]
@@ -357,7 +363,7 @@
         },
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "name": "[concat(variables('vmN'), copyIndex(), variables('mgmt-pipN-suffix'))]",
+            "name": "[concat(parameters('virtualMachineName'), copyIndex(), variables('mgmt-pipN-suffix'))]",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
             "tags": {

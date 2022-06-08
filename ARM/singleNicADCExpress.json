@@ -54,26 +54,11 @@
                 "description": "Resource Group name of existing Virtual Network. Leave empty if Resource Group is same as current deployment."
             }
         },
-        "networkInterfaceName": {
-            "defaultValue": "citrix-adc-vpx-express-nic",
+        "subnetName": {
+            "defaultValue": "default_subnet",
             "type": "string",
             "metadata": {
-                "description": "Name of the Virtual Network Interface Card."
-            }
-        },
-        "networkSecurityGroupName": {
-            "defaultValue": "citrix-adc-vpx-xxpress-nsg",
-            "type": "string",
-            "metadata": {
-                "description": "Name of the Network Security Group."
-            }
-        },
-        "diagnosticsStorageAccountName": {
-            "defaultValue": "",
-            "type": "string",
-            
-            "metadata": {
-                "description": "Name of the diagnostics Storage Account. If left empty, an auto-generated name will be used."
+                "description": "Name of subnet. ensure subnet exists in case of existing Virtual Network."
             }
         },
         "acceleratedNetworking": {
@@ -83,19 +68,22 @@
                 "description": "Enables low latency and high throughput on the network interface.[Learn more](https://docs.microsoft.com/en-gb/azure/virtual-network/create-vm-accelerated-networking-cli)"
             }
         },
-        "subnetName": {
-            "defaultValue": "default_subnet",
+        "diagnosticsStorageAccountName": {
+            "defaultValue": "",
             "type": "string",
+            
             "metadata": {
-                "description": "Name of subnet. ensure subnet exists in case of existing Virtual Network."
+                "description": "Name of the diagnostics Storage Account. If left empty, an auto-generated name will be used."
             }
         }
     },
     "variables": {
+        "nicN": "[concat('nic-',parameters('virtualMachineName'))]",
+        "nsgN": "[concat('nsg-',parameters('virtualMachineName'))]",
         "vnetRg": "[if(equals(parameters('vnetResourceGroup'), ''), resourceGroup().name,parameters('vnetResourceGroup'))]",
         "vnetId": "[resourceId(variables('vnetRG'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-        "nicId": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]",
+        "nicId": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicN'))]",
         "diagnosticsStorageAccountName": "[if(equals(parameters('diagnosticsStorageAccountName'), ''), concat('vpxstracct', uniqueString(resourceGroup().id)), parameters('diagnosticsStorageAccountName'))]"
     },
     "resources": [
@@ -121,7 +109,7 @@
                         "ADCDeployed": "Resource"
                     },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicN'))]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-nsip')]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]"
             ],
@@ -153,7 +141,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicN'))]"
                         }
                     ]
                 },
@@ -185,7 +173,7 @@
             "properties": {}
         },
         {
-            "name": "[parameters('networkInterfaceName')]",
+            "name": "[variables('nicN')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
@@ -195,7 +183,7 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-vip')]",
                 "[concat('Microsoft.Network/publicIpAddresses/', parameters('virtualMachineName'), '-nsip')]",
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgN'))]"
             ],
             "properties": {
                 "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
@@ -241,7 +229,7 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgN'))]",
                     "tags": {
                         "ADCDeployed": "Resource"
                     }
@@ -280,7 +268,7 @@
             }
         },
         {
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[variables('nsgN')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2017-10-01",
             "location": "[resourceGroup().location]",
