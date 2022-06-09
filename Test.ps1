@@ -4,9 +4,6 @@ $requri = "https://fa-e2evc.azurewebsites.net/api/orchestrators/Orchestration"
 #Test to build a new ADC Single Node
 $body = @{type="new";vmsize="standard";vmname="myctxadc";osversion="121";adctype="single";vnetname="vnet-e2evc";subnetName="subnet1"}  | ConvertTo-Json #standard, large, xlarge - 2016,2019,2022
 
-#Test to build a new ADC H/A Node
-#$body = @{type="new";vmsize="standard";email="leee.jeffries@leeejeffries.com";version="2016"}  | ConvertTo-Json #standard, large, xlarge - 2016,2019,2022
-
 ##Test to query an ADCs details
 #$body = @{type="query";vmname="myctxadc"}  | ConvertTo-Json #vmname is mandatory
 
